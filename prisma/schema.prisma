@@ -18,6 +18,7 @@ Workspace Workspace?
 Tasks Task[]
 Comments Comment[]
 }
+
 enum Role {
   ADMIN
   USER
@@ -54,6 +55,7 @@ createdAt DateTime @default(now())
 updatedAt DateTime @updatedAt
 columns Column[]
 }
+
 enum InvitedUserRights {
   Guest
   Member
