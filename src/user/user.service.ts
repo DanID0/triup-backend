@@ -18,7 +18,13 @@ export class UserService {
       },
     });
   }
-
+  async findByEmail(email: string) {
+    return await prisma.user.findUnique({
+      where: {
+        email: email,
+      },
+    });
+  }
   findAll() {
     return `This action returns all user`;
   }
