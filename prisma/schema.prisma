@@ -17,6 +17,7 @@ interfaceLanguage Language  @default(LATVIAN)
 Workspace Workspace?
 Tasks Task[]
 Comments Comment[]
+hashedRefreshToken String?
 }
 
 enum Role {

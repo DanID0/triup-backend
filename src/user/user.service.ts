@@ -8,6 +8,12 @@ const prisma = new PrismaClient();
 
 @Injectable()
 export class UserService {
+  async updateHashedRefreshToken(userId: number, hashedRefreshToken: string | null) {
+    return prisma.user.update({
+      where: { id: userId },
+      data: {hashedRefreshToken: hashedRefreshToken},
+    });
+  }
   async create(createUserDto: CreateUserDto) {
     const hashedPassword = bcrypt.hashSync(createUserDto.password, 10);
     return prisma.user.create({
@@ -41,6 +47,7 @@ export class UserService {
         role: true,
         interfaceLanguage: true,
         Workspace: true,
+        hashedRefreshToken: true,
       },
     })
   }
@@ -51,5 +58,6 @@ export class UserService {
 
   remove(id: number) {
     return `This action removes a #${id} user`;
+    
   }
 }
