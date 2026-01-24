@@ -22,20 +22,20 @@ export class AuthService {
         return {id: user.id};
     }
 
-    async login(userId:number) {
+    async login(userId:string) {
         //const payload: AuthJwtPayload = { sub: userId };
         //const token = this.jwtService.sign(payload);
        // const refreshToken = this.jwtService.sign(payload, this.refreshTokenConfig);
       const {accessToken, refreshToken} = await this.generateTokens(userId);
       const hashedRefreshToken = await argon2.hash(refreshToken);
-      await this.userService.updateHashedRefreshToken(userId, hashedRefreshToken);
+      await this.userService.updateHashedRefreshToken(userId.toString(), hashedRefreshToken);
        return {
             id: userId,
             accessToken,
             refreshToken,
         };
     }
-    async generateTokens(userId:number){
+    async generateTokens(userId:string){
         const payload: AuthJwtPayload = { sub: userId };
         const [accessToken, refreshToken] = await Promise.all([
             this.jwtService.signAsync(payload),
@@ -46,10 +46,10 @@ export class AuthService {
             refreshToken,
         };
     }
-    async refreshToken(userId:number){
+    async refreshToken(userId:string){
         const {accessToken, refreshToken} = await this.generateTokens(userId);
         const hashedRefreshToken = await argon2.hash(refreshToken);
-        await this.userService.updateHashedRefreshToken(userId, hashedRefreshToken);
+        await this.userService.updateHashedRefreshToken(userId.toString(), hashedRefreshToken);
          return {
               id: userId,
               accessToken,
@@ -57,7 +57,7 @@ export class AuthService {
           };
 
     }
-    async validateRefreshToken(refreshToken: string, userId:number){
+    async validateRefreshToken(refreshToken: string, userId:string){
       const user = await this.userService.findOne(userId);
       if (!user || !user.hashedRefreshToken) 
         throw new UnauthorizedException('Invalid refresh token!');    
@@ -68,6 +68,6 @@ export class AuthService {
 }
 
 async logout(userId:number){
-  await this.userService.updateHashedRefreshToken(userId, null);
+  await this.userService.updateHashedRefreshToken(userId.toString(), null);
 }
 }

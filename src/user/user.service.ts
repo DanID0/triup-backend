@@ -8,7 +8,7 @@ const prisma = new PrismaClient();
 
 @Injectable()
 export class UserService {
-  async updateHashedRefreshToken(userId: number, hashedRefreshToken: string | null) {
+  async updateHashedRefreshToken(userId: string, hashedRefreshToken: string | null) {
     return prisma.user.update({
       where: { id: userId },
       data: {hashedRefreshToken: hashedRefreshToken},
@@ -35,7 +35,7 @@ export class UserService {
     return `This action returns all user`;
   }
 
-  async findOne(id: number) {
+  async findOne(id: string) {
     return prisma.user.findUnique({
       where: {
         id: id,
