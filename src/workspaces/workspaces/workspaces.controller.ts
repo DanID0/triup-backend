@@ -9,28 +9,29 @@ export class WorkspacesController {
   constructor(private readonly workspacesService: WorkspacesService) {}
 
   @Post()
-  create(@Body() createWorkspaceDto: CreateWorkspaceDto) {
-    return this.workspacesService.create(createWorkspaceDto);
+  @UseGuards(JwtAuthGuard)
+  create(@Body() createWorkspaceDto: CreateWorkspaceDto, @Req() req) {
+    return this.workspacesService.create(createWorkspaceDto, req.user.id);
   }
 
   @Get() 
   @UseGuards(JwtAuthGuard)
   findAll(@Req() req) {
-    console.log(req.user.id);
+    return this.workspacesService.findAll(req.user.id);
   }
-
+ 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.workspacesService.findOne(+id);
+    return this.workspacesService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateWorkspaceDto: UpdateWorkspaceDto) {
-    return this.workspacesService.update(+id, updateWorkspaceDto);
+    return this.workspacesService.update(id, updateWorkspaceDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.workspacesService.remove(+id);
+    return this.workspacesService.remove(id);
   }
 }

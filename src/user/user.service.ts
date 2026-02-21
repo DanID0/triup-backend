@@ -52,12 +52,25 @@ export class UserService {
     })
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(userId: number, updateUserDto: UpdateUserDto) {
+    return prisma.user.update({
+      where: { id: userId.toString()},
+      data: {
+        username: updateUserDto.username,
+        interfaceLanguage: updateUserDto.interfaceLanguage,
+      },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        interfaceLanguage: true,
+      },
+    });
+
   }
 
   remove(id: number) {
-    return `This action removes a #${id} user`;
     
+
   }
 }

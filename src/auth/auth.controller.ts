@@ -1,4 +1,4 @@
-import { Controller, HttpCode, HttpStatus, Post, Req, Request, UseGuards } from '@nestjs/common';
+import { Controller, HttpCode, HttpStatus, Post, Req, Request, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import { LocalAuthGuard } from './guard/jwt-auth/local-auth/local-auth.guard';
@@ -12,13 +12,20 @@ export class AuthController {
   @HttpCode(HttpStatus.OK) 
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Request() req){
-    return this.authService.login(req.user.id);
-  
+  async login(@Request() req,@Res() res){
+    const token = await this.authService.login(req.user.id);
+    res.cookie('token', token.accessToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'lax',
+      maxAge: 1000 * 60 * 60 * 7, // 1 week
+    });
+    return res.send(token);
+    
   }
   @UseGuards(RefreshAuthGuard)
   @Post('refresh')
-  async refreshToken(@Req() req){
+  async refreshToken(@Req() req,){
     return this.authService.refreshToken(req.user.id);
   }
   @UseGuards(JwtAuthGuard)

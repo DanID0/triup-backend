@@ -20,20 +20,25 @@ export class UserController {
  getProfile(@Req() req){
   return this.userService.findOne(req.user.id);
  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+@UseGuards(JwtAuthGuard)
+  @Patch('profile')
+  update(@Req() req, @Body() updateUserDto: UpdateUserDto) {
+    return this.userService.update(req.user.id, updateUserDto);
   }
   //@SetMetadata('role', ['ADMIN'])
 
   @Roles(InvitedUserRights.Admin)
   @UseGuards(RolesGuard)
   @UseGuards(JwtAuthGuard)
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+  @Delete('profile')
+  remove(@Req() req) {
+    return this.userService.remove(req.user.id);
   }
- 
-
+ // @NoAccountGuard()
+ // @Post('verify-token')
+  //async generateEmailVerificationToken(@CurrentUser() user: User){
+//await this.userService.generateEmailVerificationToken(user.id);
+    // {status: 'sucess', message: 'email has been sent'}
+  //}
+ //async 
 } 

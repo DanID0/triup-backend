@@ -6,23 +6,40 @@ import { PrismaService } from 'src/prisma/prisma.service';
 @Injectable()
 export class WorkspacesService {
   constructor(private prisma: PrismaService) {}
-  create(createWorkspaceDto: CreateWorkspaceDto) {
-    return 'This action adds a new workspace';
+  create(createWorkspaceDto: CreateWorkspaceDto, userId: string) {
+    return this.prisma.workspace.create({
+      data: {
+        name: createWorkspaceDto.name,
+        accessType: createWorkspaceDto.accessType,
+        userId: userId,
+      },
+    });
   }
 
-  findAll() {
-    return this.prisma.workspace.findMany();
+  findAll(id: string) {
+    return this.prisma.workspace.findMany(
+    {
+      where: {
+        id: id,
+      },
+    }
+    );
+    
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} workspace`;
+  findOne(id: string) {
+      return this.prisma.workspace.findUnique({
+        where: {
+          id: id,
+        },
+      });
   }
 
-  update(id: number, updateWorkspaceDto: UpdateWorkspaceDto) {
+  update(id: string, updateWorkspaceDto: UpdateWorkspaceDto) {
     return `This action updates a #${id} workspace`;
   }
 
-  remove(id: number) {
+  remove(id: string) {
     return `This action removes a #${id} workspace`;
   }
 }
