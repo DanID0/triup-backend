@@ -6,9 +6,12 @@ import { AuthModule } from './auth/auth.module';
 import { WorkspacesModule } from './workspaces/workspaces/workspaces.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { BoardsModule } from './boards/boards.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtAuthGuard } from './auth/guard/jwt-auth/jwt-auth.guard';
+import { TaskModule } from './task/task.module';
 
 @Module({
-  imports: [UserModule, AuthModule, WorkspacesModule, PrismaModule, BoardsModule],
+  imports: [UserModule, AuthModule, WorkspacesModule, PrismaModule, BoardsModule, TaskModule],
   controllers: [AppController],
   providers: [AppService],
 })
