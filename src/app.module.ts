@@ -9,9 +9,20 @@ import { BoardsModule } from './boards/boards.module';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from './auth/guard/jwt-auth/jwt-auth.guard';
 import { TaskModule } from './task/task.module';
+import { ColumnModule } from './column/column.module';
+import { CommentModule } from './comment/comment.module';
 
 @Module({
-  imports: [UserModule, AuthModule, WorkspacesModule, PrismaModule, BoardsModule, TaskModule],
+  imports: [
+    PrismaModule,
+    UserModule,
+    AuthModule,
+    WorkspacesModule,
+    BoardsModule,
+    ColumnModule,
+    TaskModule,
+    CommentModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

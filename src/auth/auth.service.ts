@@ -57,17 +57,17 @@ export class AuthService {
           };
 
     }
-    async validateRefreshToken(refreshToken: string, userId:string){
+    async validateRefreshToken(refreshToken: string, userId: string) {
       const user = await this.userService.findOne(userId);
-      if (!user || !user.hashedRefreshToken) 
-        throw new UnauthorizedException('Invalid refresh token!');    
-    
+      if (!user.hashedRefreshToken)
+        throw new UnauthorizedException('Invalid refresh token!');
+
       const refreshTokenMatches = await argon2.verify(user.hashedRefreshToken, refreshToken);
       if (!refreshTokenMatches) throw new UnauthorizedException('Invalid refresh token!');
-      return {id: userId};
-}
+      return { id: userId };
+    }
 
-async logout(userId:number){
-  await this.userService.updateHashedRefreshToken(userId.toString(), null);
+async logout(userId: string) {
+  await this.userService.updateHashedRefreshToken(userId, null);
 }
 }

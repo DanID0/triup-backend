@@ -1,31 +1,27 @@
-import { Priority } from "@prisma/client";
-import { IsEnum, IsOptional, IsString, IsUUID } from "class-validator";
+import { Priority } from '@prisma/client';
+import { IsDateString, IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
+
 export class CreateTaskDto {
-    
-    @IsString()
-    name: string;
+  @IsString()
+  name: string;
 
-    @IsString()
-    @IsOptional()
-    description: string;
-    dueDate:string;
+  @IsString()
+  @IsOptional()
+  description?: string;
 
-    @IsUUID()
-    columnId: string;
+  @IsDateString()
+  @IsOptional()
+  dueDate?: string;
 
-    @IsUUID()
-    @IsOptional()
-    asignee: string;
-    
+  @IsUUID()
+  columnId: string;
 
-    @IsOptional()
-    @IsEnum(Priority)
-    priority: Priority;
+  @IsUUID()
+  @IsOptional()
+  assigneeId?: string;
 
-    
-
-
+  @IsOptional()
+  @IsEnum(Priority)
+  priority?: Priority;
 }
-
-
 

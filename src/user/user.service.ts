@@ -1,22 +1,23 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
-
-const prisma = new PrismaClient();
 
 @Injectable()
 export class UserService {
+  constructor(private prisma: PrismaService) {}
+
   async updateHashedRefreshToken(userId: string, hashedRefreshToken: string | null) {
-    return prisma.user.update({
+    return this.prisma.user.update({
       where: { id: userId },
-      data: {hashedRefreshToken: hashedRefreshToken},
+      data: { hashedRefreshToken },
     });
   }
+
   async create(createUserDto: CreateUserDto) {
     const hashedPassword = bcrypt.hashSync(createUserDto.password, 10);
-    return prisma.user.create({
+    return this.prisma.user.create({
       data: {
         username: createUserDto.username,
         email: createUserDto.email,
@@ -24,22 +25,16 @@ export class UserService {
       },
     });
   }
+
   async findByEmail(email: string) {
-    return await prisma.user.findUnique({
-      where: {
-        email: email,
-      },
+    return this.prisma.user.findUnique({
+      where: { email },
     });
-  }
-  findAll() {
-    return `This action returns all user`;
   }
 
   async findOne(id: string) {
-    return prisma.user.findUnique({
-      where: {
-        id: id,
-      },
+    const user = await this.prisma.user.findUnique({
+      where: { id },
       select: {
         id: true,
         username: true,
@@ -49,12 +44,14 @@ export class UserService {
         Workspace: true,
         hashedRefreshToken: true,
       },
-    })
+    });
+    if (!user) throw new NotFoundException(`User with id ${id} not found`);
+    return user;
   }
 
-  async update(userId: number, updateUserDto: UpdateUserDto) {
-    return prisma.user.update({
-      where: { id: userId.toString()},
+  async update(userId: string, updateUserDto: UpdateUserDto) {
+    return this.prisma.user.update({
+      where: { id: userId },
       data: {
         username: updateUserDto.username,
         interfaceLanguage: updateUserDto.interfaceLanguage,
@@ -66,11 +63,10 @@ export class UserService {
         interfaceLanguage: true,
       },
     });
-
   }
 
-  remove(id: number) {
-    
-
+  async remove(id: string) {
+    await this.findOne(id);
+    return this.prisma.user.delete({ where: { id } });
   }
 }
