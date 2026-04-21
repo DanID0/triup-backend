@@ -6,9 +6,8 @@ import { AuthJwtPayload } from '../types/auth-jwtPayload';
 import { Inject, Injectable } from '@nestjs/common';
 import type { Request } from 'express';
 const cookieExtractor = (req: Request): string | null => {
-    console.log(req.cookies)
     if (req && req.cookies) {
-      return req.cookies['token'];
+      return req.cookies['token'] ?? null;
     }
     return null;
   };
