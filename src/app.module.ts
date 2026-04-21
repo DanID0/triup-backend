@@ -9,6 +9,7 @@ import { BoardsModule } from './boards/boards.module';
 import { TaskModule } from './task/task.module';
 import { ColumnModule } from './column/column.module';
 import { CommentModule } from './comment/comment.module';
+import { UploadModule } from './upload/upload.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { CommentModule } from './comment/comment.module';
     ColumnModule,
     TaskModule,
     CommentModule,
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [AppService],

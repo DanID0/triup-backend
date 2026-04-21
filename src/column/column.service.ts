@@ -14,7 +14,7 @@ export class ColumnService {
         boardId: createColumnDto.boardId,
         color: createColumnDto.color,
         position: createColumnDto.position ?? 0,
-      },
+      } as any,
     });
   }
 
@@ -44,7 +44,7 @@ export class ColumnService {
         color: updateColumnDto.color,
         position: updateColumnDto.position,
         boardId: updateColumnDto.boardId,
-      },
+      } as any,
     });
   }
 

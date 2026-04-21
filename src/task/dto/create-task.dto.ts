@@ -1,27 +1,52 @@
 import { Priority } from '@prisma/client';
-import { IsDateString, IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsDateString,
+  IsEnum,
+  IsOptional,
+  IsString,
+  IsUUID,
+  ValidateIf,
+} from 'class-validator';
 
 export class CreateTaskDto {
   @IsString()
   name: string;
 
+  @IsOptional()
+  @ValidateIf((_, v) => v !== null)
   @IsString()
-  @IsOptional()
-  description?: string;
+  description?: string | null;
 
-  @IsDateString()
   @IsOptional()
-  dueDate?: string;
+  @ValidateIf((_, v) => v !== null)
+  @IsDateString()
+  dueDate?: string | null;
 
   @IsUUID()
   columnId: string;
 
-  @IsUUID()
   @IsOptional()
-  assigneeId?: string;
+  @ValidateIf((_, v) => v !== null)
+  @IsUUID()
+  assigneeId?: string | null;
 
   @IsOptional()
   @IsEnum(Priority)
   priority?: Priority;
-}
 
+  @IsOptional()
+  @IsBoolean()
+  completed?: boolean;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  labels?: string[];
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  attachments?: string[];
+}

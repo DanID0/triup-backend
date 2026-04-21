@@ -79,6 +79,8 @@ id String @id @default(uuid())
 workspaceId String
 workspace Workspace @relation(fields: [workspaceId], references: [id])
 name String
+backgroundImageUrl String?
+shareToken String? @unique
 UserBoard UserBoard[]
 createdAt DateTime @default(now())
 updatedAt DateTime @updatedAt
@@ -118,6 +120,9 @@ model Task {
   description String?
   priority  Priority  @default(Medium)
   dueDate DateTime?
+  completed Boolean @default(false)
+  labels String[] @default([])
+  attachments String[] @default([])
   assigneeId String?
   assignee User?  @relation(fields: [assigneeId], references: [id])
   createdAt DateTime  @default(now())
