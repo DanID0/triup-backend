@@ -36,11 +36,47 @@ export class BoardMembersController {
 
   @Get()
   async list(@Param('boardId') boardId: string) {
-    return this.prisma.userBoard.findMany({
-      where: { boardId },
-      include: { user: { select: { id: true, username: true, email: true } } },
-      orderBy: { createdAt: 'asc' },
-    });
+    const [members, board] = await Promise.all([
+      this.prisma.userBoard.findMany({
+        where: { boardId },
+        include: {
+          user: { select: { id: true, username: true, email: true } },
+        },
+        orderBy: { createdAt: 'asc' },
+      }),
+      this.prisma.board.findUnique({
+        where: { id: boardId },
+        select: {
+          createdAt: true,
+          workspace: {
+            select: {
+              user: {
+                select: { id: true, username: true, email: true },
+              },
+            },
+          },
+        },
+      }),
+    ]);
+
+    if (!board?.workspace?.user) return members;
+    const owner = board.workspace.user;
+    if (members.some((m) => m.userId === owner.id)) return members;
+
+    // Surface the workspace owner as a synthetic Admin entry so the UI can
+    // display them alongside invited members. The id is namespaced so the
+    // client knows it isn't a real UserBoard row.
+    const ownerEntry = {
+      id: `owner:${owner.id}`,
+      userId: owner.id,
+      boardId,
+      invitedUserRights: 'Admin' as InvitedUserRights,
+      createdAt: board.createdAt,
+      updatedAt: board.createdAt,
+      user: owner,
+      isOwner: true,
+    };
+    return [ownerEntry, ...members];
   }
 
   @Post()

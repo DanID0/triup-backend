@@ -6,8 +6,10 @@ import {
   Patch,
   Param,
   Delete,
+  Req,
   UseGuards,
 } from '@nestjs/common';
+import type { Request } from 'express';
 import { BoardsService } from './boards.service';
 import { CreateBoardDto } from './dto/create-board.dto';
 import { UpdateBoardDto } from './dto/update-board.dto';
@@ -21,6 +23,19 @@ export class BoardsController {
   @Get('public/:shareToken')
   findByShareToken(@Param('shareToken') shareToken: string) {
     return this.boardsService.findByShareToken(shareToken);
+  }
+
+  // Authenticated route called when a logged-in user lands on a shared link.
+  // Adds them to the board as a Member if they aren't already, then returns
+  // the board so the client can navigate to its regular page.
+  @UseGuards(JwtAuthGuard)
+  @Post('public/:shareToken/join')
+  joinViaShareToken(
+    @Param('shareToken') shareToken: string,
+    @Req() req: Request,
+  ) {
+    const userId = (req.user as { id: string }).id;
+    return this.boardsService.joinViaShareToken(shareToken, userId);
   }
 
   @UseGuards(JwtAuthGuard)

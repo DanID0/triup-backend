@@ -103,4 +103,35 @@ export class BoardsService {
       data: { shareToken: null } as any,
     });
   }
+
+  /**
+   * Idempotently adds the calling user to a board reached via shared link.
+   * - Workspace owners pass through (they already have implicit access).
+   * - Existing members are returned as-is.
+   * - New users are added with `Member` rights (sane default for an
+   *   unsolicited join via link).
+   */
+  async joinViaShareToken(token: string, userId: string) {
+    const board = await this.prisma.board.findUnique({
+      where: { shareToken: token } as any,
+      include: { workspace: { select: { userId: true } } },
+    });
+    if (!board) throw new NotFoundException('Shared board not found');
+
+    if (board.workspace.userId === userId) return board;
+
+    const existing = await this.prisma.userBoard.findFirst({
+      where: { boardId: board.id, userId },
+    });
+    if (existing) return board;
+
+    await this.prisma.userBoard.create({
+      data: {
+        boardId: board.id,
+        userId,
+        invitedUserRights: 'Member',
+      },
+    });
+    return board;
+  }
 }
