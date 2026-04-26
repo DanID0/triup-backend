@@ -40,43 +40,65 @@ export class BoardsController {
 
   @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createBoardDto: CreateBoardDto) {
-    return this.boardsService.create(createBoardDto);
+  create(
+    @Body() createBoardDto: CreateBoardDto,
+    @Req() req: Request,
+  ) {
+    return this.boardsService.create(
+      createBoardDto,
+      (req.user as { id: string }).id,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('workspace/:workspaceId')
-  findAll(@Param('workspaceId') workspaceId: string) {
-    return this.boardsService.findAll(workspaceId);
+  findAllByWorkspace(
+    @Param('workspaceId') workspaceId: string,
+    @Req() req: Request,
+  ) {
+    return this.boardsService.findAllForUser(
+      workspaceId,
+      (req.user as { id: string }).id,
+    );
   }
 
   @UseGuards(JwtAuthGuard)
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.boardsService.findOne(id);
+  findOne(@Param('id') id: string, @Req() req: Request) {
+    return this.boardsService.findOneForUser(id, (req.user as { id: string }).id);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':id/activity')
+  getActivity(@Param('id') id: string, @Req() req: Request) {
+    return this.boardsService.getActivityForUser(id, (req.user as { id: string }).id);
   }
 
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBoardDto: UpdateBoardDto) {
-    return this.boardsService.update(id, updateBoardDto);
+  update(@Param('id') id: string, @Body() updateBoardDto: UpdateBoardDto, @Req() req: Request) {
+    const userId = (req.user as { id: string }).id;
+    return this.boardsService.update(id, updateBoardDto, userId);
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.boardsService.remove(id);
+  remove(@Param('id') id: string, @Req() req: Request) {
+    const userId = (req.user as { id: string }).id;
+    return this.boardsService.remove(id, userId);
   }
 
   @UseGuards(JwtAuthGuard)
   @Post(':id/share')
-  enableShare(@Param('id') id: string) {
-    return this.boardsService.rotateShareToken(id);
+  enableShare(@Param('id') id: string, @Req() req: Request) {
+    const userId = (req.user as { id: string }).id;
+    return this.boardsService.rotateShareToken(id, userId);
   }
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id/share')
-  disableShare(@Param('id') id: string) {
-    return this.boardsService.disableShareToken(id);
+  disableShare(@Param('id') id: string, @Req() req: Request) {
+    const userId = (req.user as { id: string }).id;
+    return this.boardsService.disableShareToken(id, userId);
   }
 }

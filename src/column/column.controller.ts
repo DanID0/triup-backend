@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query, Req } from '@nestjs/common';
+import type { Request } from 'express';
 import { ColumnService } from './column.service';
 import { CreateColumnDto } from './dto/create-column.dto';
 import { UpdateColumnDto } from './dto/update-column.dto';
@@ -10,8 +11,9 @@ export class ColumnController {
   constructor(private readonly columnService: ColumnService) {}
 
   @Post()
-  create(@Body() createColumnDto: CreateColumnDto) {
-    return this.columnService.create(createColumnDto);
+  create(@Body() createColumnDto: CreateColumnDto, @Req() req: Request) {
+    const userId = (req.user as { id: string }).id;
+    return this.columnService.create(createColumnDto, userId);
   }
 
   @Get()
@@ -25,12 +27,14 @@ export class ColumnController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateColumnDto: UpdateColumnDto) {
-    return this.columnService.update(id, updateColumnDto);
+  update(@Param('id') id: string, @Body() updateColumnDto: UpdateColumnDto, @Req() req: Request) {
+    const userId = (req.user as { id: string }).id;
+    return this.columnService.update(id, updateColumnDto, userId);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.columnService.remove(id);
+  remove(@Param('id') id: string, @Req() req: Request) {
+    const userId = (req.user as { id: string }).id;
+    return this.columnService.remove(id, userId);
   }
 }

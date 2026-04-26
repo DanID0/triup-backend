@@ -11,7 +11,15 @@ import * as argon2 from 'argon2';
 export class AuthService {
     constructor(private userService: UserService, private jwtService: JwtService, @Inject(refreshJwtConfig.KEY) private refreshTokenConfig: ConfigType<typeof refreshJwtConfig>) {}
     async validateUser(email: string, password: string) {
-        const user = await this.userService.findByEmail(email);
+        const normalizedEmail = (email || '').trim().toLowerCase();
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(normalizedEmail)) {
+            throw new UnauthorizedException('Please enter a valid email address');
+        }
+        if (!password || password.length < 7) {
+            throw new UnauthorizedException('Password must be at least 7 characters long');
+        }
+        const user = await this.userService.findByEmail(normalizedEmail);
         if (!user) {
             throw new UnauthorizedException('User not found!');
         }
@@ -58,7 +66,7 @@ export class AuthService {
 
     }
     async validateRefreshToken(refreshToken: string, userId: string) {
-      const user = await this.userService.findOne(userId);
+      const user = await this.userService.findAuthUser(userId);
       if (!user.hashedRefreshToken)
         throw new UnauthorizedException('Invalid refresh token!');
 

@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
- // url = env("DATABASE_URL")
+  //url = env("DATABASE_URL")
 }
 
 enum Role {
@@ -35,11 +35,24 @@ enum Priority {
   High
 }
 
+enum BoardActivityType {
+  COMMENT
+  TASK_CREATED
+  TASK_UPDATED
+  TASK_MOVED
+  TASK_DELETED
+  COLUMN_CREATED
+  COLUMN_UPDATED
+  COLUMN_DELETED
+  BOARD_UPDATED
+}
+
 model User{
 id String @id @default(uuid())
 username String @unique
 password String
 email String @unique
+avatarUrl String?
 role Role @default(USER)
 interfaceLanguage Language  @default(LATVIAN)
 Workspace Workspace[]
@@ -48,6 +61,7 @@ Comments Comment[]
 hashedRefreshToken String?
 UserBoard UserBoard[]
 UserWorkspace UserWorkspace[]
+BoardActivity BoardActivity[]
 }
 
 model UserWorkspace {
@@ -85,6 +99,7 @@ UserBoard UserBoard[]
 createdAt DateTime @default(now())
 updatedAt DateTime @updatedAt
 columns Column[]
+activities BoardActivity[]
 }
 
 model UserBoard {
@@ -98,6 +113,21 @@ model UserBoard {
   invitedUserRights InvitedUserRights @default(Guest)
 
   @@unique([userId, boardId])
+}
+
+model BoardActivity {
+  id String @id @default(uuid())
+  boardId String
+  board Board @relation(fields: [boardId], references: [id])
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  type BoardActivityType
+  message String
+  meta Json?
+  createdAt DateTime @default(now())
+
+  @@index([boardId, createdAt])
+  @@index([userId])
 }
 
 model Column {

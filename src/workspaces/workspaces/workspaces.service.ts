@@ -20,7 +20,7 @@ export class WorkspacesService {
       },
       include: {
         Boards: true,
-        user: { select: { id: true, username: true } },
+        user: { select: { id: true, username: true, avatarUrl: true } },
       },
     });
   }
@@ -30,12 +30,22 @@ export class WorkspacesService {
       where: {
         OR: [
           { userId },
-          { UserWorkspace: { some: { userId } } },
+          {
+            accessType: 'Public',
+            OR: [
+              { UserWorkspace: { some: { userId } } },
+              {
+                Boards: {
+                  some: { UserBoard: { some: { userId } } },
+                },
+              },
+            ],
+          },
         ],
       },
       include: {
         Boards: true,
-        user: { select: { id: true, username: true } },
+        user: { select: { id: true, username: true, avatarUrl: true } },
       },
       orderBy: { createdAt: 'asc' },
     });
@@ -46,13 +56,13 @@ export class WorkspacesService {
       where: { id },
       include: {
         Boards: true,
-        user: { select: { id: true, username: true } },
+        user: { select: { id: true, username: true, avatarUrl: true } },
         UserWorkspace: { select: { userId: true } },
       },
     });
     if (!workspace)
       throw new NotFoundException(`Workspace with id ${id} not found`);
-    this.assertAccess(workspace, userId);
+    await this.assertAccess(workspace, userId);
     const { UserWorkspace: _members, ...rest } = workspace;
     return rest;
   }
@@ -71,7 +81,7 @@ export class WorkspacesService {
       },
       include: {
         Boards: true,
-        user: { select: { id: true, username: true } },
+        user: { select: { id: true, username: true, avatarUrl: true } },
       },
     });
   }
@@ -81,17 +91,25 @@ export class WorkspacesService {
     return this.prisma.workspace.delete({ where: { id } });
   }
 
-  private assertAccess(
-    workspace: { userId: string; UserWorkspace: { userId: string }[] },
+  private async assertAccess(
+    workspace: {
+      id: string;
+      userId: string;
+      accessType: string;
+      UserWorkspace: { userId: string }[];
+    },
     userId: string,
   ) {
-    const isOwner = workspace.userId === userId;
-    const isMember = workspace.UserWorkspace.some(
-      (m) => m.userId === userId,
-    );
-    if (!isOwner && !isMember) {
+    if (workspace.userId === userId) return;
+    if (workspace.accessType === 'Privates') {
       throw new ForbiddenException('You do not have access to this workspace');
     }
+    if (workspace.UserWorkspace.some((m) => m.userId === userId)) return;
+    const boardAccess = await this.prisma.userBoard.findFirst({
+      where: { userId, board: { workspaceId: workspace.id } },
+    });
+    if (boardAccess) return;
+    throw new ForbiddenException('You do not have access to this workspace');
   }
 
   private async assertOwner(workspaceId: string, userId: string) {
