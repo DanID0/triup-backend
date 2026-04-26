@@ -20,6 +20,6 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY package.json .
 
-CMD ["node", "dist/src/main.js"]
+CMD ["node", "dist/main.js"]
 
 EXPOSE 3000
